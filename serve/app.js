@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyp = require('body-parser');
+const { query } = require('express');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.all("*",function(req,res,next){
         next();
 })
 
+
 app.use(bodyp.json())
 
 app.get('/', (req,res) => {
@@ -38,6 +40,19 @@ app.delete('/:name',(req,res) => {
     arrData.splice(arrData.findIndex((ele) => ele.name === req.params.name),1)
     res.end()
 })
+
+app.put('/:name', (req,res) => {
+    arrData.forEach((ele) =>{
+        if(ele.name === req.params.name) {
+            ele.gender = req.body.gender
+            ele.email = req.body.email
+        }
+    })
+    res.end()
+})
+
+app.use(express.static('public'))
+
 
 app.listen(3000, () => {
     console.log('server running')

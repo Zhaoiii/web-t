@@ -6,6 +6,7 @@
     <template #name="{ text }">{{ text.first }} {{ text.last }}</template>
     <template #action="{ record }">
       <button @click="del(record.name)">删除</button>
+      <button @click="edit(record.name)">修改</button>
     </template>
   </a-table>
   <span>name</span>
@@ -15,16 +16,23 @@
   <span>email</span>
   <a-input class="w-200" v-model:value='email'></a-input>
   <button @click="addData">增加</button>
+  <a-modal :title='modalTitle' :visible='isshow' @ok="sub">
+    <span>gender</span>
+    <a-input class="w-200"  v-model:value='editGender'></a-input>
+    <span>email</span>
+    <a-input class="w-200" v-model:value='editEmail'></a-input>
+  </a-modal>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Table, Input } from 'ant-design-vue'
+import { Table, Input, Modal } from 'ant-design-vue'
 import axios from 'axios'
 
 export default defineComponent({
   components: {
     aTable: Table,
-    aInput: Input
+    aInput: Input,
+    aModal: Modal
   },
   setup () {
     const columns = [
@@ -53,6 +61,10 @@ export default defineComponent({
     const name = ref()
     const gender = ref()
     const email = ref()
+    const modalTitle = ref()
+    const isshow = ref(false)
+    const editGender = ref()
+    const editEmail = ref()
     const getData = () => {
       axios.get('http://localhost:3000/').then((res: any) => { console.log(res.data); data.value = res.data })
     }
@@ -66,7 +78,21 @@ export default defineComponent({
     }
 
     const del = (name: string) => {
-      axios.delete(`http://localhost:3000/${name}`).then(() => getData())
+      axios.delete(`http://localhost:3000/${name}/`).then(() => getData())
+    }
+
+    const edit = (name:string) => {
+      isshow.value = true
+      modalTitle.value = name
+    }
+
+    const sub = async () => {
+      await axios.put(`http://localhost:3000/${modalTitle.value}/`, { gender: editGender.value, email: editEmail.value })
+      editEmail.value = ''
+      editGender.value = ''
+      modalTitle.value = ''
+      isshow.value = false
+      getData()
     }
 
     getData()
@@ -77,7 +103,13 @@ export default defineComponent({
       gender,
       email,
       addData,
-      del
+      del,
+      modalTitle,
+      isshow,
+      edit,
+      sub,
+      editGender,
+      editEmail
     }
   }
 })
